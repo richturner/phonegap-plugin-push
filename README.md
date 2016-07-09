@@ -1,4 +1,8 @@
-#phonegap-plugin-push [![Build Status](https://travis-ci.org/phonegap/phonegap-plugin-push.svg)](https://travis-ci.org/phonegap/phonegap-plugin-push)
+#phonegap-plugin-push MODIFIED
+
+This is a modified version of the [ponegap-plugin-push](https://github.com/phonegap/phonegap-plugin-push) plugin that allows the cordova app to be started in the background when a silent (data) push notification is received. It uses the [cordova-plugin-background-app](https://github.com/MobileChromeApps/cordova-plugin-background-app) plugin to provide the background launching and please refer to that plugins documentation to see how you can detect a background (no UI) start up of your app.
+
+There are very few changes to the original plugin code and currently implementation is limited to Android.
 
 > Register and receive push notifications
 
