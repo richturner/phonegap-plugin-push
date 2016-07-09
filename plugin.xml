@@ -20,6 +20,8 @@
         <clobbers target="PushNotification" />
 	</js-module>
 
+  <dependency id="cordova-plugin-background-app" version="1.0.1"></dependency>
+  
 	<engines>
         <engine name="cordova" version=">=3.6.3" />
         <engine name="cordova-android" version=">=4.0.0" />

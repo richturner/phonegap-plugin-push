@@ -5,6 +5,10 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.app.PendingIntent;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 import com.google.android.gms.gcm.GcmPubSub;
 import com.google.android.gms.iid.InstanceID;
@@ -24,6 +28,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 import me.leolin.shortcutbadger.ShortcutBadger;
+import org.chromium.BackgroundEventHandler;
+import org.chromium.BackgroundEventInfo;
 
 public class PushPlugin extends CordovaPlugin implements PushConstants {
 
@@ -33,6 +39,24 @@ public class PushPlugin extends CordovaPlugin implements PushConstants {
     private static CordovaWebView gWebView;
     private static Bundle gCachedExtras = null;
     private static boolean gForeground = false;
+    private static BackgroundEventHandler<PushPlugin> eventHandler;
+
+    public static BackgroundEventHandler<PushPlugin> getEventHandler() {
+        if (eventHandler == null) {
+            eventHandler = createEventHandler();
+        }
+        return eventHandler;
+    }
+
+    private static BackgroundEventHandler<PushPlugin> createEventHandler() {
+
+        return new BackgroundEventHandler<PushPlugin>() {
+            @Override
+            public void mapEventToMessage(BackgroundEventInfo event, JSONObject message) throws JSONException {
+                message.put("id", event.action);
+            }
+        };
+    }
 
     /**
      * Gets the application context from cordova's main activity.
@@ -135,7 +159,7 @@ public class PushPlugin extends CordovaPlugin implements PushConstants {
 
                     if (gCachedExtras != null) {
                         Log.v(LOG_TAG, "sending cached extras");
-                        sendExtras(gCachedExtras);
+                        sendExtras(getApplicationContext(), gCachedExtras);
                         gCachedExtras = null;
                     }
                 }
@@ -239,13 +263,18 @@ public class PushPlugin extends CordovaPlugin implements PushConstants {
      * Sends the pushbundle extras to the client application.
      * If the client application isn't currently active, it is cached for later processing.
      */
-    public static void sendExtras(Bundle extras) {
+    public static void sendExtras(Context context, Bundle extras) {
         if (extras != null) {
             if (gWebView != null) {
                 sendEvent(convertBundleToJson(extras));
             } else {
                 Log.v(LOG_TAG, "sendExtras: caching extras to send at a later time.");
                 gCachedExtras = extras;
+
+                Log.v(LOG_TAG,"launching app in the background to process the push notification");
+                Intent intent = new Intent(context, BackgroundActivityHandler.class);
+                getEventHandler().makeBackgroundEventIntent(intent);
+                PushPlugin.getEventHandler().handleBroadcast(context, intent);
             }
         }
     }

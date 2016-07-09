@@ -26,7 +26,7 @@ public class BackgroundActionButtonHandler extends BroadcastReceiver implements 
             originalExtras.putBoolean(FOREGROUND, false);
             originalExtras.putBoolean(COLDSTART, false);
             originalExtras.putString(ACTION_CALLBACK, extras.getString(CALLBACK));
-            PushPlugin.sendExtras(originalExtras);
+            PushPlugin.sendExtras(context, originalExtras);
         }
      }
 }
